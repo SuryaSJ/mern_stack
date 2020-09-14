@@ -22,7 +22,7 @@ const initialReducer=(state,action)=>{
 }
 const Input = (props) => {
 
-    const [inputState,dispatch]  =useReducer(initialReducer,{value:props.value||'',isValid:props.isValid ||false,isTouched:false});
+    const [inputState,dispatch]  =useReducer(initialReducer,{value:props.initialValue||'',isValid:props.initialValidity ||false,isTouched:false});
     const { id,onInput} =props;
     const { value, isValid} =inputState;
     useEffect(()=>{

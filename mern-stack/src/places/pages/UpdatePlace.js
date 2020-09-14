@@ -1,8 +1,10 @@
-import React from 'react'
+import React,{useEffect, useState} from 'react'
+import { useParams } from 'react-router-dom';
+import { useForm } from '../../shared/custom-hooks/form-hooks';
 import { VALIDATOR_REQUIRE, VALIDATOR_MINLENGTH } from '../../shared/util/validators';
 import Input from '../../shared/components/FormElements/Input';
 import Button from '../../shared/components/FormElements/Button/Button';
-import { useParams } from 'react-router-dom';
+import Card from '../../shared/components/UI/Card';
 import './PlaceForm.css';
 const UpdatePlace = (props) => {
     const DUMMY_PLACES=[
@@ -33,8 +35,36 @@ const UpdatePlace = (props) => {
     ]
 
     const {placeId} =useParams();
-    const identifiedPlace=DUMMY_PLACES.find(place=>place.id===placeId);
+    const [isLoading,setIsLoading] = useState(true);
 
+    const [formstate, inputChangeHandler,setFormData]=  useForm({
+        title:{
+            value:'',
+            isValid:false
+        },
+        description:{
+            value:'',
+            isValid:false
+        },
+        
+    },false)
+
+    const identifiedPlace=DUMMY_PLACES.find(place=>place.id===placeId);
+    useEffect(() => {
+        setFormData({
+            title:{
+                value:identifiedPlace.title,
+                isValid:true
+            },
+            description:{
+                value:identifiedPlace.description,
+                isValid:true
+            },
+        },true);
+        setIsLoading(false);
+       
+    }, [setFormData,identifiedPlace.title,identifiedPlace.description]);
+//TODO: check why only adding identifiedPlace leads to infiniteloop
     if(!identifiedPlace){
         return (
             <div className="center">
@@ -42,12 +72,24 @@ const UpdatePlace = (props) => {
             </div>
         )
     };
-    
+    if(isLoading){
+        return (
+            <div className="center">
+                <Card>
+                <h2>Loading....</h2>
+                </Card>
+            </div>
+        )
+    };
+   const submitHandler=(e)=>{
+       e.preventDefault();
+        console.log(formstate);
+    }
     return (
-        <form className="place-form">
-          <Input element="input" value={identifiedPlace.title} id="title" type="text" label="Title" validators={[VALIDATOR_REQUIRE()]} errorText={'Please type in input'} valid={true} onInput={()=>{}} />
-          <Input element="textarea" value={identifiedPlace.description} id="description" type="text" label="Description" validators={[ VALIDATOR_MINLENGTH(3)]} errorText={'Please type in atleast {3} characters'} valid={true} onInput={()=>{}}/>
-          <Button type="submit"  disabled={true}>SAVE PLACE</Button>  
+        <form className="place-form" onSubmit={submitHandler}>
+          <Input element="input" initialValue={formstate.inputs.title.value} id="title" type="text" label="Title" validators={[VALIDATOR_REQUIRE()]} errorText={'Please type in input'} initialValidity={formstate.inputs.title.isValid} onInput={inputChangeHandler} />
+          <Input element="textarea" initialValue={formstate.inputs.description.value} id="description" type="text" label="Description" validators={[ VALIDATOR_MINLENGTH(3)]} errorText={'Please type in atleast {3} characters'} initialValidity={formstate.inputs.description.isValid} onInput={inputChangeHandler}/>
+          <Button type="submit"  disabled={!formstate.isValid}>SAVE PLACE</Button>  
         </form>
     )
 }

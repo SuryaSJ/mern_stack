@@ -1,59 +1,26 @@
-import React, { useCallback, useReducer } from 'react'
+import React from 'react'
 import { VALIDATOR_REQUIRE, VALIDATOR_MINLENGTH } from '../../shared/util/validators';
 import Input from '../../shared/components/FormElements/Input';
 import Button from '../../shared/components/FormElements/Button/Button';
 import './PlaceForm.css';
+import { useForm} from '../../shared/custom-hooks/form-hooks';
 
-const formReducer=(state,action)=>{
-
-    switch(action.type){
-
-        case 'INPUT_CHANGE':
-            let isFormValid=true;
-            for(const inputId in state.inputs){
-                if(inputId===action.inputId){
-                    isFormValid=isFormValid && action.isValid;
-                }else {
-                    isFormValid=isFormValid && state.inputs[action.inputId].isValid;
-                }
-            }
-            
-            return {
-                ...state,
-                inputs:{
-                    ...state.inputs,
-                    [action.inputId]:{
-                        value: action.value,
-                        isValid:action.isValid
-                    }
-                },
-                isValid:isFormValid
-            }
-
-        default:
-            return state;
-    }
-}
 const NewPlace = () => {
-    const initialState ={
-        inputs:{
-            title:{
-                value:'',
-                isValid:false
-            },
-            description:{
-                value:'',
-                isValid:false
-            },
-            address:{
-                value:'',
-                isValid:false
-            }
+   
+  const [formstate, inputChangeHandler]=  useForm({
+        title:{
+            value:'',
+            isValid:false
         },
-        isValid:false
-    }
-    const [formstate, dispatch] =useReducer(formReducer, initialState);
-    const inputChangeHandler=useCallback((id,value,isValid)=>{ dispatch({type: 'INPUT_CHANGE',value:value,inputId:id, isValid:isValid})},[]);
+        description:{
+            value:'',
+            isValid:false
+        },
+        address:{
+            value:'',
+            isValid:false
+        }
+    },false)
     const submitHandler =(event)=>{
         event.preventDefault();
         console.log("Form state",formstate.inputs);
